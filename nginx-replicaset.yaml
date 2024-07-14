@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+spec:
+  replicas: 5
+  selector:
+    matchLabels: 
+      app: mon-app
+  template:
+    metadata:
+      labels:
+        app: mon-app
+    spec:
+      containers:
+        - name: nginx-container
+          image: nginx
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nginx-service-v2
+spec:
+  selector:
+    app: mon-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 31001
+  type: NodePort
