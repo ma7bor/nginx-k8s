@@ -13,10 +13,12 @@ This project contains Kubernetes configuration files to deploy an Nginx applicat
    - [Deployment](#deployment)
    - [Service](#service)
 4. [Understanding Kubernetes Resources](#understanding-kubernetes-resources)
-5. [Commands](#commands)
-   - [Applying Configuration Files](#applying-configuration-files)
-   - [Checking Status](#checking-status)
-   - [Accessing the Application](#accessing-the-application)
+5. [Running the Project](#running-the-project)
+   - [Step 1: Apply ReplicaSet Configuration](#step-1-apply-replicaset-configuration)
+   - [Step 2: Access the Service](#step-2-access-the-service)
+   - [Step 3: Clean Up ReplicaSet](#step-3-clean-up-replicaset)
+   - [Step 4: Apply Deployment Configuration](#step-4-apply-deployment-configuration)
+   - [Step 5: Compare Deployment and ReplicaSet](#step-5-compare-deployment-and-replicaset)
 6. [Troubleshooting](#troubleshooting)
 7. [Cleaning Up](#cleaning-up)
 
@@ -34,22 +36,8 @@ This project contains Kubernetes configuration files to deploy an Nginx applicat
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/nginx-kubernetes-deployment.git
-cd nginx-kubernetes-deployment
-```
-
-### Apply Configuration Files
-
-Apply the ReplicaSet configuration:
-
-```bash
-kubectl apply -f nginx.replicaset.yaml
-```
-
-Apply the Deployment configuration:
-
-```bash
-kubectl apply -f nginx.deployment.yaml
+git clone https://github.com/ma7bor/nginx-k8s.git
+cd nginx-k8s
 ```
 
 ## Configuration Files
@@ -165,29 +153,60 @@ Using Deployments instead of directly managing ReplicaSets offers several advant
 
 In summary, Deployments manage ReplicaSets, and ReplicaSets manage Pods. Pods, in turn, are an abstraction over containers. This hierarchy allows Kubernetes to provide robust and flexible management of containerized applications.
 
-## Commands
+## Running the Project
 
-### Applying Configuration Files
+### Step 1: Apply ReplicaSet Configuration
 
-To apply the configuration files, use the following commands:
+First, apply the ReplicaSet configuration to create the Pods:
 
 ```bash
 kubectl apply -f nginx.replicaset.yaml
+```
+
+### Step 2: Access the Service
+
+Check the status of the Service:
+
+```bash
+kubectl get svc nginx-servicev3
+```
+
+For local development using `minikube`, you can open the service URL directly in your browser:
+
+```bash
+minikube service nginx-servicev3
+```
+
+This command will open the Nginx application in your default web browser.
+
+### Step 3: Clean Up ReplicaSet
+
+Delete the ReplicaSet and associated resources to prepare for the Deployment:
+
+```bash
+kubectl delete -f nginx.replicaset.yaml
+```
+
+### Step 4: Apply Deployment Configuration
+
+Next, apply the Deployment configuration to create and manage the Pods via ReplicaSets:
+
+```bash
 kubectl apply -f nginx.deployment.yaml
 ```
 
-### Checking Status
-
-Check the status of the ReplicaSet:
-
-```bash
-kubectl get rs nginx-replicaset
-```
+### Step 5: Compare Deployment and ReplicaSet
 
 Check the status of the Deployment:
 
 ```bash
 kubectl get deployments nginx-deployment
+```
+
+Check the status of the ReplicaSet created by the Deployment:
+
+```bash
+kubectl get rs -l app=nginx
 ```
 
 Check the status of the Pods:
@@ -202,15 +221,13 @@ Check the status of the Service:
 kubectl get svc nginx-servicev3
 ```
 
-### Accessing the Application
-
-Once the Service is created, access the Nginx application using the external IP of any node in the cluster and the `nodePort` specified in the Service configuration (e.g., `http://<node-ip>:31002`).
-
-For local development using `minikube`, you can open the service URL directly in your browser:
+Access the Nginx application using `minikube` as before:
 
 ```bash
 minikube service nginx-servicev3
 ```
+
+Observe how the Deployment manages the ReplicaSet and, by extension, the Pods. This demonstrates the benefits of using Deployments for managing application updates, scaling, and rollback.
 
 ## Troubleshooting
 
@@ -224,7 +241,7 @@ minikube service nginx-servicev3
 
   ```bash
   kubectl describe deployment nginx-deployment
-  kubectl describe rs nginx-replicaset
+  kubectl describe rs -l app=nginx
   ```
 
 - Ensure that the nodes have sufficient resources to run the containers with the specified resource requests and limits.
@@ -237,5 +254,3 @@ To delete the resources created by these configuration files, use the following 
 kubectl delete -f nginx.replicaset.yaml
 kubectl delete -f nginx.deployment.yaml
 ```
-
----
